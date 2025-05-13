@@ -12,8 +12,16 @@ const Navigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Input">
-        <Stack.Screen name="Input" component={InputScreen} />
-        <Stack.Screen name="Output" component={OutputScreen} />
+        <Stack.Screen
+          name="Input"
+          component={InputScreen}
+          options={{ title: "AI Logo" }}
+        />
+        <Stack.Screen
+          name="Output"
+          component={OutputScreen}
+          options={{ title: "Your Design" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

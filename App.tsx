@@ -7,7 +7,7 @@ import Navigation from "./src/navigation";
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Navigation />
     </SafeAreaProvider>
   );
@@ -16,7 +16,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#09090B",
     alignItems: "center",
     justifyContent: "center",
   },
