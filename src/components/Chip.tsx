@@ -51,7 +51,7 @@ const Chip: React.FC<ChipProps> = ({ status, onPress, style, textStyle }) => {
           </Text>
           <Text style={styles.subText}>
             {isDone
-              ? "Tap to see it..."
+              ? "Tap to see it."
               : isProcessing
               ? "Ready in 2 minutes"
               : "Click to try again"}
@@ -108,9 +108,10 @@ const styles = StyleSheet.create({
     height: 75,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   textContainer: {
+    gap: 2,
     paddingLeft: 16,
   },
   placeholderImage: {
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   subText: {
-    color: "#FAFAFA",
+    color: "#71717A",
     fontSize: 14,
     fontWeight: "400",
   },

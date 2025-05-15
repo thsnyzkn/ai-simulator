@@ -3,6 +3,8 @@ import { View, Text, Image, StyleSheet } from "react-native";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 
+import { Background } from "../components";
+
 type Props = {
   route: RouteProp<RootStackParamList, "Output">;
 };
@@ -11,22 +13,25 @@ const OutputScreen: React.FC<Props> = ({ route }) => {
   const { imageUrl, prompt, selectedStyle } = route.params;
 
   return (
-    <View style={styles.content}>
-      <View style={styles.designContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.designImage} />
-      </View>
-      <View style={styles.infoContainer}>
-        <View style={styles.promptSection}>
-          <Text style={styles.label}>Prompt</Text>
-          <View style={styles.copyContainer}>
-            <Image source={require("../assets/copy.png")} />
-            <Text style={styles.value}>Copy</Text>
-          </View>
+    <View style={styles.container}>
+      <Background />
+      <View style={styles.content}>
+        <View style={styles.designContainer}>
+          <Image source={{ uri: imageUrl }} style={styles.designImage} />
         </View>
-        <View style={styles.styleSection}>
-          <Text style={styles.text}>{prompt}</Text>
-          <View style={styles.styleContainer}>
-            <Text style={styles.value}>{selectedStyle}</Text>
+        <View style={styles.infoContainer}>
+          <View style={styles.promptSection}>
+            <Text style={styles.label}>Prompt</Text>
+            <View style={styles.copyContainer}>
+              <Image source={require("../assets/copy.png")} />
+              <Text style={styles.value}>Copy</Text>
+            </View>
+          </View>
+          <View style={styles.styleSection}>
+            <Text style={styles.text}>{prompt}</Text>
+            <View style={styles.styleContainer}>
+              <Text style={styles.value}>{selectedStyle}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -35,6 +40,9 @@ const OutputScreen: React.FC<Props> = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   content: {
     padding: 20,
     gap: 24,

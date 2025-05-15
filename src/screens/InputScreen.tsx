@@ -9,12 +9,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Alert,
 } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
 import { LogoStatus, RootStackParamList } from "../types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Chip } from "../components";
+import { Chip, Background } from "../components";
+
+import {
+  createGenerationEntry,
+  markGenerationAsDone,
+} from "../services/generationService";
 
 interface SuggestionItem {
   id: string;
@@ -53,14 +59,15 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
   const [inputText, setInputText] = useState<string>("");
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [selectedStyle, setSelectedStyle] = useState<string>("1");
-  const [status, setStatus] = useState<LogoStatus>("done");
+  const [status, setStatus] = useState<LogoStatus>("idle");
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [docId, setDocId] = useState<string | null>(null);
+
+  const mockCompletionTime = 3000; // 3 seconds for testing
 
   const handleSuggestionPress = (suggestion: SuggestionItem): void => {
     setSelectedStyle(suggestion.id);
-  };
-
-  const handleCreatePress = (): void => {
-    if (!inputText.trim()) return;
   };
 
   const handleSurpriseMePress = (): void => {
@@ -75,6 +82,34 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
     setInputText(randomPrompt);
   };
 
+  const handleGenerateLogo = async () => {
+    console.log("Generating logo with prompt:", inputText);
+    const delay = Math.random() * 30000 + 30000;
+    if (!inputText.trim()) return;
+    try {
+      setIsLoading(true);
+      setStatus("processing");
+      setIsLoading(false);
+
+      const id = await createGenerationEntry();
+      setDocId(id);
+
+      setTimeout(async () => {
+        try {
+          await markGenerationAsDone(id);
+          setStatus("done");
+        } catch (error) {
+          console.error("Error updating status:", error);
+          Alert.alert("Error", "Failed to update request status");
+        }
+      }, mockCompletionTime);
+    } catch (error) {
+      console.error("Error generating logo:", error);
+      Alert.alert("Error", "Failed to generate logo");
+      setIsLoading(false);
+    }
+  };
+
   const handleViewResult = () => {
     navigation.navigate("Output", {
       imageUrl: "https://picsum.photos/200",
@@ -86,91 +121,105 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <View style={styles.actionContainer}>
-        <Chip status={status} onPress={handleViewResult} style={styles.chip} />
-      </View>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Enter Your Prompt</Text>
-        <TouchableOpacity onPress={handleSurpriseMePress}>
-          <Text style={styles.surpriseText}>🎲 Surprise me</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          multiline
-          numberOfLines={8}
-          placeholder="A blue lion logo reading 'HEXA' in bold letters"
-          placeholderTextColor="rgba(255, 255, 255, 0.5)"
-          style={[styles.textInput, isFocused && styles.textInputFocused]}
-          maxLength={500}
-          onChangeText={setInputText}
-          value={inputText}
-          autoFocus={false}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-        />
-        <Text style={styles.characterCount}>{`${inputText.length}/500`}</Text>
-      </View>
-
-      <Text style={styles.suggestionsTitle}>Logo Styles</Text>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.suggestionsScrollView}
+    <>
+      <Background />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
       >
-        {SUGGESTIONS.map((suggestion) => (
-          <TouchableOpacity
-            key={suggestion.id}
-            style={[styles.suggestionItem]}
-            onPress={() => handleSuggestionPress(suggestion)}
-          >
-            <Image
-              source={suggestion.image}
-              style={[
-                styles.suggestionImage,
-                suggestion.id === "1" && styles.firstOptionImage,
-                selectedStyle === suggestion.id && styles.selectedImage,
-              ]}
-              resizeMode="cover"
-            />
-            <Text
-              style={[
-                styles.suggestionText,
-                selectedStyle === suggestion.id && styles.selectedText,
-              ]}
-            >
-              {suggestion.text}
-            </Text>
+        <View style={styles.actionContainer}>
+          <Chip
+            status={status}
+            onPress={handleViewResult}
+            style={styles.chip}
+          />
+        </View>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Enter Your Prompt</Text>
+          <TouchableOpacity onPress={handleSurpriseMePress}>
+            <Text style={styles.surpriseText}>🎲 Surprise me</Text>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
-      <LinearGradient
-        colors={["#2938DC", "#943DFF"]}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}
-        style={styles.createButton}
-      >
-        <TouchableOpacity
-          style={[!inputText.trim() && styles.createButtonDisabled]}
-          onPress={handleCreatePress}
+        </View>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            multiline
+            numberOfLines={8}
+            placeholder="A blue lion logo reading 'HEXA' in bold letters"
+            placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            style={[styles.textInput, isFocused && styles.textInputFocused]}
+            maxLength={500}
+            onChangeText={setInputText}
+            value={inputText}
+            autoFocus={false}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+          />
+          <Text style={styles.characterCount}>{`${inputText.length}/500`}</Text>
+        </View>
+
+        <Text style={styles.suggestionsTitle}>Logo Styles</Text>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.suggestionsScrollView}
         >
-          <Text style={styles.createButtonText}>Create</Text>
-        </TouchableOpacity>
-      </LinearGradient>
-    </KeyboardAvoidingView>
+          {SUGGESTIONS.map((suggestion) => (
+            <TouchableOpacity
+              key={suggestion.id}
+              style={[styles.suggestionItem]}
+              onPress={() => handleSuggestionPress(suggestion)}
+            >
+              <Image
+                source={suggestion.image}
+                style={[
+                  styles.suggestionImage,
+                  suggestion.id === "1" && styles.firstOptionImage,
+                  selectedStyle === suggestion.id && styles.selectedImage,
+                ]}
+                resizeMode="cover"
+              />
+              <Text
+                style={[
+                  styles.suggestionText,
+                  selectedStyle === suggestion.id && styles.selectedText,
+                ]}
+              >
+                {suggestion.text}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        <LinearGradient
+          colors={["#2938DC", "#943DFF"]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.createButton}
+        >
+          <TouchableOpacity
+            style={[
+              styles.buttonWrapper,
+              !inputText.trim() && styles.createButtonDisabled,
+            ]}
+            onPress={handleGenerateLogo}
+          >
+            <Text style={styles.createButtonText}>Create</Text>
+            <Image
+              source={require("../assets/stars.png")}
+              style={{ width: 20, height: 20, resizeMode: "cover" }}
+            />
+          </TouchableOpacity>
+        </LinearGradient>
+      </KeyboardAvoidingView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#09090B",
+    padding: 20,
   },
   header: {
     paddingVertical: 12,
@@ -185,7 +234,7 @@ const styles = StyleSheet.create({
   },
   surpriseText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "400",
     lineHeight: 18,
   },
@@ -218,7 +267,6 @@ const styles = StyleSheet.create({
   },
   suggestionsTitle: {
     marginTop: 20,
-    marginBottom: 10,
     fontSize: 20,
     fontWeight: "800",
     color: "#fff",
@@ -228,14 +276,13 @@ const styles = StyleSheet.create({
   },
   suggestionItem: {
     marginRight: 12,
-    marginTop: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   suggestionImage: {
     width: 90,
     height: 90,
-    borderRadius: 13.75,
+    borderRadius: 16,
     marginBottom: 8,
     borderWidth: 2,
     borderColor: "transparent",
@@ -258,12 +305,12 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 50,
     alignItems: "center",
+    marginHorizontal: 20,
   },
   createButtonDisabled: {
     backgroundColor: "rgba(108, 93, 211, 0.5)",
   },
   createButtonText: {
-    backgroundColor: "transparent",
     color: "white",
     fontSize: 16,
     fontWeight: "600",
@@ -283,6 +330,11 @@ const styles = StyleSheet.create({
   },
   chip: {
     marginTop: 20,
+  },
+  buttonWrapper: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
   },
 });
 

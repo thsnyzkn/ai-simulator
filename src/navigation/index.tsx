@@ -19,7 +19,7 @@ const Navigation = () => {
             backgroundColor: "#09090B",
           },
           headerTitleStyle: {
-            color: "#FFFFFF",
+            color: "#FAFAFA",
           },
           contentStyle: {
             backgroundColor: "#09090B",
@@ -37,10 +37,14 @@ const Navigation = () => {
           component={OutputScreen}
           options={({ navigation }) => ({
             title: "Your Design",
-            presentation: 'modal',
+            presentation: "modal",
             headerRight: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Text style={{ color: '#FFFFFF', fontSize: 24, fontWeight: '300' }}>✕</Text>
+                <Text
+                  style={{ color: "#FAFAFA", fontSize: 24, fontWeight: "300" }}
+                >
+                  ✕
+                </Text>
               </TouchableOpacity>
             ),
           })}
