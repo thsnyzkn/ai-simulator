@@ -12,6 +12,9 @@ import {
 } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
+import { LogoStatus, RootStackParamList } from "../types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Chip } from "../components";
 
 interface SuggestionItem {
   id: string;
@@ -42,10 +45,15 @@ const SUGGESTIONS: SuggestionItem[] = [
   },
 ];
 
-const InputScreen: React.FC = () => {
+interface Props {
+  navigation: NativeStackNavigationProp<RootStackParamList, "Input">;
+}
+
+const InputScreen: React.FC<Props> = ({ navigation }) => {
   const [inputText, setInputText] = useState<string>("");
   const [isFocused, setIsFocused] = useState<boolean>(false);
-  const [selectedStyle, setSelectedStyle] = useState<string>("1"); // Default to first style
+  const [selectedStyle, setSelectedStyle] = useState<string>("1");
+  const [status, setStatus] = useState<LogoStatus>("error");
 
   const handleSuggestionPress = (suggestion: SuggestionItem): void => {
     setSelectedStyle(suggestion.id);
@@ -53,17 +61,24 @@ const InputScreen: React.FC = () => {
 
   const handleCreatePress = (): void => {
     if (!inputText.trim()) return;
-    console.log(
-      "Create button pressed with:",
-      inputText,
-      "style:",
-      selectedStyle
-    );
   };
 
   const handleSurpriseMePress = (): void => {
-    const randomIndex = Math.floor(Math.random() * SUGGESTIONS.length);
-    setSelectedStyle(SUGGESTIONS[randomIndex].id);
+    const prompts = [
+      "A futuristic robot logo with neon lights",
+      "A minimalist tree logo with green and brown tones",
+      "A retro-style gaming console logo",
+      "A sleek and modern car logo",
+      "A colorful parrot logo with vibrant feathers",
+    ];
+    const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+    setInputText(randomPrompt);
+  };
+
+  const handleViewResult = () => {
+    navigation.navigate("Output", {
+      imageUrl: "https://placehold.co/400x400",
+    });
   };
 
   return (
@@ -71,6 +86,9 @@ const InputScreen: React.FC = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
+      <View style={styles.actionContainer}>
+        <Chip status={status} onPress={handleViewResult} style={styles.chip} />
+      </View>
       <View style={styles.header}>
         <Text style={styles.headerText}>Enter Your Prompt</Text>
         <TouchableOpacity onPress={handleSurpriseMePress}>
@@ -105,10 +123,7 @@ const InputScreen: React.FC = () => {
         {SUGGESTIONS.map((suggestion) => (
           <TouchableOpacity
             key={suggestion.id}
-            style={[
-              styles.suggestionItem,
-              selectedStyle === suggestion.id && styles.selectedSuggestion,
-            ]}
+            style={[styles.suggestionItem]}
             onPress={() => handleSuggestionPress(suggestion)}
           >
             <Image
@@ -132,7 +147,9 @@ const InputScreen: React.FC = () => {
         ))}
       </ScrollView>
       <LinearGradient
-        colors={["#943DFF", "#2938DC"]}
+        colors={["#2938DC", "#943DFF"]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
         style={styles.createButton}
       >
         <TouchableOpacity
@@ -149,10 +166,9 @@ const InputScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#09090B",
   },
   header: {
-    paddingHorizontal: 20,
     paddingVertical: 12,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -171,7 +187,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     position: "relative",
-    marginHorizontal: 20,
   },
   textInput: {
     height: 175,
@@ -198,7 +213,6 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.5)",
   },
   suggestionsTitle: {
-    marginLeft: 20,
     marginTop: 20,
     marginBottom: 10,
     fontSize: 20,
@@ -206,15 +220,12 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   suggestionsScrollView: {
-    paddingHorizontal: 20,
     maxHeight: 150,
   },
   suggestionItem: {
     marginRight: 12,
     marginTop: 16,
     alignItems: "center",
-    width: 90,
-    height: 90,
     justifyContent: "center",
   },
   suggestionImage: {
@@ -225,24 +236,21 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
   },
-  selectedSuggestion: {
-    // Removed background color change
-  },
   suggestionText: {
-    color: "rgba(113, 113, 122, 1)",
+    color: "#71717A",
     fontSize: 13,
     textAlign: "center",
     width: "100%",
   },
   selectedText: {
-    color: "rgba(250, 250, 250, 1)",
+    color: "#FAFAFA",
     fontWeight: "600",
   },
   createButton: {
     position: "absolute",
     bottom: 34,
-    left: 20,
-    right: 20,
+    left: 0,
+    right: 0,
     padding: 15,
     borderRadius: 50,
     alignItems: "center",
@@ -260,9 +268,17 @@ const styles = StyleSheet.create({
     borderColor: "#FAFAFA",
   },
   firstOptionImage: {
+    backgroundColor: "rgba(41, 56, 220, 0.1)",
     width: 90,
     height: 90,
     padding: 20,
+  },
+  actionContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  chip: {
+    marginTop: 20,
   },
 });
 

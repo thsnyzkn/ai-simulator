@@ -11,7 +11,21 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Navigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Input">
+      <Stack.Navigator
+        initialRouteName="Input"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "#09090B",
+          },
+          headerTitleStyle: {
+            color: "#FFFFFF",
+          },
+          contentStyle: {
+            backgroundColor: "#09090B",
+          },
+          headerShadowVisible: false,
+        }}
+      >
         <Stack.Screen
           name="Input"
           component={InputScreen}
@@ -26,4 +40,5 @@ const Navigation = () => {
     </NavigationContainer>
   );
 };
+
 export default Navigation;
