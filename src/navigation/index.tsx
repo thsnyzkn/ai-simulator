@@ -1,6 +1,7 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { TouchableOpacity, Text } from "react-native";
 
 import { RootStackParamList } from "../types";
 import InputScreen from "../screens/InputScreen";
@@ -34,7 +35,15 @@ const Navigation = () => {
         <Stack.Screen
           name="Output"
           component={OutputScreen}
-          options={{ title: "Your Design" }}
+          options={({ navigation }) => ({
+            title: "Your Design",
+            presentation: 'modal',
+            headerRight: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Text style={{ color: '#FFFFFF', fontSize: 24, fontWeight: '300' }}>✕</Text>
+              </TouchableOpacity>
+            ),
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>

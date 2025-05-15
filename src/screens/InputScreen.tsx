@@ -53,7 +53,7 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
   const [inputText, setInputText] = useState<string>("");
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [selectedStyle, setSelectedStyle] = useState<string>("1");
-  const [status, setStatus] = useState<LogoStatus>("error");
+  const [status, setStatus] = useState<LogoStatus>("done");
 
   const handleSuggestionPress = (suggestion: SuggestionItem): void => {
     setSelectedStyle(suggestion.id);
@@ -77,7 +77,11 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleViewResult = () => {
     navigation.navigate("Output", {
-      imageUrl: "https://placehold.co/400x400",
+      imageUrl: "https://picsum.photos/200",
+      selectedStyle:
+        SUGGESTIONS.find((item) => item.id === selectedStyle)?.text ||
+        "Unknown Style",
+      prompt: inputText,
     });
   };
 
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
   },
   surpriseText: {
     color: "#fff",
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "400",
     lineHeight: 18,
   },
@@ -238,7 +242,7 @@ const styles = StyleSheet.create({
   },
   suggestionText: {
     color: "#71717A",
-    fontSize: 13,
+    fontSize: 12,
     textAlign: "center",
     width: "100%",
   },
