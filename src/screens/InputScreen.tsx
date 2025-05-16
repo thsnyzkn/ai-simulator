@@ -64,7 +64,9 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [docId, setDocId] = useState<string | null>(null);
 
-  const mockCompletionTime = 3000; // 3 seconds for testing
+  const mockCompletionTime = Math.floor(
+    Math.random() * (60000 - 30000 + 1) + 30000
+  ); // Random time between 30-60 seconds
 
   const handleSuggestionPress = (suggestion: SuggestionItem): void => {
     setSelectedStyle(suggestion.id);
@@ -83,16 +85,13 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleGenerateLogo = async () => {
-    console.log("Generating logo with prompt:", inputText);
-    const delay = Math.random() * 30000 + 30000;
     if (!inputText.trim()) return;
     try {
       setIsLoading(true);
       setStatus("processing");
-      setIsLoading(false);
-
       const id = await createGenerationEntry();
       setDocId(id);
+      setIsLoading(false);
 
       setTimeout(async () => {
         try {
@@ -100,13 +99,21 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
           setStatus("done");
         } catch (error) {
           console.error("Error updating status:", error);
-          Alert.alert("Error", "Failed to update request status");
+          setStatus("error");
+          Alert.alert(
+            "Connection Error",
+            "Failed to update status. Please check your internet connection and try again."
+          );
         }
       }, mockCompletionTime);
     } catch (error) {
       console.error("Error generating logo:", error);
-      Alert.alert("Error", "Failed to generate logo");
+      setStatus("error");
       setIsLoading(false);
+      Alert.alert(
+        "Connection Error",
+        "Failed to generate logo. Please check your internet connection and try again."
+      );
     }
   };
 
@@ -129,6 +136,7 @@ const InputScreen: React.FC<Props> = ({ navigation }) => {
       >
         <View style={styles.actionContainer}>
           <Chip
+            generationId={docId ?? ""}
             status={status}
             onPress={handleViewResult}
             style={styles.chip}

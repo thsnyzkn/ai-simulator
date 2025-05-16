@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Spinner } from ".";
+import { useGenerationStatus } from "../hooks/useGenerationStatus";
 import { LogoStatus } from "../types";
 
 interface ChipProps {
@@ -17,9 +18,16 @@ interface ChipProps {
   onPress?: () => void;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  generationId: string;
 }
 
-const Chip: React.FC<ChipProps> = ({ status, onPress, style, textStyle }) => {
+const Chip: React.FC<ChipProps> = ({
+  onPress,
+  generationId,
+  style,
+  textStyle,
+}) => {
+  const status = useGenerationStatus(generationId);
   const isProcessing = status === "processing";
   const isDone = status === "done";
 
@@ -49,7 +57,7 @@ const Chip: React.FC<ChipProps> = ({ status, onPress, style, textStyle }) => {
               ? "Your Design is Ready!"
               : "Ooops, something went wrong!"}
           </Text>
-          <Text style={styles.subText}>
+          <Text style={[styles.subText, isDone && styles.doneText]}>
             {isDone
               ? "Tap to see it."
               : isProcessing
@@ -142,6 +150,9 @@ const styles = StyleSheet.create({
     color: "#71717A",
     fontSize: 14,
     fontWeight: "400",
+  },
+  doneText: {
+    color: "#D4D4D8",
   },
 });
 export default Chip;
