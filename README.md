@@ -7,8 +7,6 @@ A React Native application that demonstrates AI simulation capabilities using Ex
 - React Native with Expo
 - TypeScript
 - Firebase (Firestore & Cloud Functions)
-- Custom hooks and components
-- Clean architecture with separation of concerns
 
 ## Prerequisites
 
@@ -20,7 +18,7 @@ A React Native application that demonstrates AI simulation capabilities using Ex
 
 1. Clone the repository:
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/thsnyzkn/ai-simulator.git
 cd HexaAISimulator
 ```
 
